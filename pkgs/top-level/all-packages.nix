@@ -34645,6 +34645,8 @@ with pkgs;
     }
   );
 
+  qemu-user-static = callPackage ../applications/virtualization/qemu/user-static.nix { };
+
   qemu-utils = qemu.override {
     toolsOnly = true;
   };
