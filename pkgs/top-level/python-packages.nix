@@ -445,6 +445,8 @@ self: super: with self; {
 
   aiozeroconf = callPackage ../development/python-modules/aiozeroconf { };
 
+  airium = callPackage ../development/python-modules/airium { };
+
   airly = callPackage ../development/python-modules/airly { };
 
   airthings-ble = callPackage ../development/python-modules/airthings-ble { };
@@ -2005,6 +2007,8 @@ self: super: with self; {
 
   chainmap = callPackage ../development/python-modules/chainmap { };
 
+  chainstream = callPackage ../development/python-modules/chainstream { };
+
   chalice = callPackage ../development/python-modules/chalice { };
 
   chameleon = callPackage ../development/python-modules/chameleon { };
@@ -2667,7 +2671,7 @@ self: super: with self; {
   datadog = callPackage ../development/python-modules/datadog { };
 
   datafusion = callPackage ../development/python-modules/datafusion {
-    inherit (pkgs.darwin.apple_sdk.frameworks) Security;
+    inherit (pkgs.darwin.apple_sdk.frameworks) Security SystemConfiguration;
   };
 
   datamodeldict = callPackage ../development/python-modules/datamodeldict { };
@@ -4279,11 +4283,11 @@ self: super: with self; {
 
   fluent-logger = callPackage ../development/python-modules/fluent-logger { };
 
-  flufl_bounce = callPackage ../development/python-modules/flufl/bounce.nix { };
+  flufl-bounce = callPackage ../development/python-modules/flufl/bounce.nix { };
 
-  flufl_i18n = callPackage ../development/python-modules/flufl/i18n.nix { };
+  flufl-i18n = callPackage ../development/python-modules/flufl/i18n.nix { };
 
-  flufl_lock = callPackage ../development/python-modules/flufl/lock.nix { };
+  flufl-lock = callPackage ../development/python-modules/flufl/lock.nix { };
 
   flux-led = callPackage ../development/python-modules/flux-led { };
 
@@ -4788,6 +4792,8 @@ self: super: with self; {
 
   google-cloud-monitoring = callPackage ../development/python-modules/google-cloud-monitoring { };
 
+  google-cloud-netapp = callPackage ../development/python-modules/google-cloud-netapp { };
+
   google-cloud-org-policy = callPackage ../development/python-modules/google-cloud-org-policy { };
 
   google-cloud-os-config = callPackage ../development/python-modules/google-cloud-os-config { };
@@ -4803,6 +4809,8 @@ self: super: with self; {
   google-cloud-secret-manager = callPackage ../development/python-modules/google-cloud-secret-manager { };
 
   google-cloud-securitycenter = callPackage ../development/python-modules/google-cloud-securitycenter { };
+
+  google-cloud-shell = callPackage ../development/python-modules/google-cloud-shell { };
 
   google-cloud-spanner = callPackage ../development/python-modules/google-cloud-spanner { };
 
@@ -4824,7 +4832,15 @@ self: super: with self; {
 
   google-cloud-vision = callPackage ../development/python-modules/google-cloud-vision { };
 
+  google-cloud-vpc-access = callPackage ../development/python-modules/google-cloud-vpc-access { };
+
+  google-cloud-webrisk = callPackage ../development/python-modules/google-cloud-webrisk { };
+
   google-cloud-websecurityscanner = callPackage ../development/python-modules/google-cloud-websecurityscanner { };
+
+  google-cloud-workflows = callPackage ../development/python-modules/google-cloud-workflows { };
+
+  google-cloud-workstations = callPackage ../development/python-modules/google-cloud-workstations { };
 
   google-compute-engine = callPackage ../tools/virtualization/google-compute-engine { };
 
@@ -5556,6 +5572,8 @@ self: super: with self; {
 
   impacket = callPackage ../development/python-modules/impacket { };
 
+  import-expression = callPackage ../development/python-modules/import-expression { };
+
   importlab = callPackage ../development/python-modules/importlab { };
 
   importlib-metadata = callPackage ../development/python-modules/importlib-metadata { };
@@ -5888,6 +5906,8 @@ self: super: with self; {
   jinja2-time = callPackage ../development/python-modules/jinja2-time { };
 
   jira = callPackage ../development/python-modules/jira { };
+
+  jishaku = callPackage ../development/python-modules/jishaku { };
 
   jiwer = callPackage ../development/python-modules/jiwer { };
 
@@ -6253,6 +6273,8 @@ self: super: with self; {
   labgrid = callPackage ../development/python-modules/labgrid { };
 
   labmath = callPackage ../development/python-modules/labmath { };
+
+  laces = callPackage ../development/python-modules/laces { };
 
   lakeside = callPackage ../development/python-modules/lakeside { };
 
@@ -8932,6 +8954,8 @@ self: super: with self; {
 
   oras = callPackage ../development/python-modules/oras { };
 
+  orbax-checkpoint = callPackage ../development/python-modules/orbax-checkpoint { };
+
   orderedmultidict = callPackage ../development/python-modules/orderedmultidict { };
 
   ordered-set = callPackage ../development/python-modules/ordered-set { };
@@ -8954,9 +8978,13 @@ self: super: with self; {
 
   osc-lib = callPackage ../development/python-modules/osc-lib { };
 
-  oscrypto = callPackage ../development/python-modules/oscrypto { };
+  osc-sdk-python = callPackage ../development/python-modules/osc-sdk-python { };
 
   oscpy = callPackage ../development/python-modules/oscpy { };
+
+  oscrypto = callPackage ../development/python-modules/oscrypto { };
+
+  oscscreen = callPackage ../development/python-modules/oscscreen { };
 
   oset = callPackage ../development/python-modules/oset { };
 
@@ -11590,6 +11618,16 @@ self: super: with self; {
 
   pytest-asyncio = callPackage ../development/python-modules/pytest-asyncio { };
 
+  pytest-asyncio_0_21 = pytest-asyncio.overridePythonAttrs (old: rec {
+    version = "0.21.1";
+    src = pkgs.fetchFromGitHub {
+      owner = "pytest-dev";
+      repo = "pytest-asyncio";
+      rev = "refs/tags/v${version}";
+      hash = "sha256-Wpo8MpCPGiXrckT2x5/yBYtGlzso/L2urG7yGc7SPkA=";
+    };
+  });
+
   pytest-bdd = callPackage ../development/python-modules/pytest-bdd { };
 
   pytest-benchmark = callPackage ../development/python-modules/pytest-benchmark { };
@@ -14188,6 +14226,10 @@ self: super: with self; {
 
   systembridge = callPackage ../development/python-modules/systembridge { };
 
+  systembridgeconnector = callPackage ../development/python-modules/systembridgeconnector { };
+
+  systembridgemodels = callPackage ../development/python-modules/systembridgemodels { };
+
   systemd = callPackage ../development/python-modules/systemd {
     inherit (pkgs) systemd;
   };
@@ -14296,6 +14338,8 @@ self: super: with self; {
   tempora = callPackage ../development/python-modules/tempora { };
 
   tenacity = callPackage ../development/python-modules/tenacity { };
+
+  tencentcloud-sdk-python = callPackage ../development/python-modules/tencentcloud-sdk-python { };
 
   tensorboard-data-server = callPackage ../development/python-modules/tensorboard-data-server { };
 

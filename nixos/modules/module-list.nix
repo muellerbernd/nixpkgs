@@ -133,6 +133,7 @@
   ./misc/meta.nix
   ./misc/nixops-autoluks.nix
   ./misc/nixpkgs.nix
+  ./misc/nixpkgs-flake.nix
   ./misc/passthru.nix
   ./misc/version.nix
   ./misc/wordlist.nix
@@ -841,6 +842,7 @@
   ./services/monitoring/riemann.nix
   ./services/monitoring/rustdesk-server.nix
   ./services/monitoring/scollector.nix
+  ./services/monitoring/scrutiny.nix
   ./services/monitoring/smartd.nix
   ./services/monitoring/snmpd.nix
   ./services/monitoring/statsd.nix
@@ -899,7 +901,6 @@
   ./services/networking/autossh.nix
   ./services/networking/avahi-daemon.nix
   ./services/networking/babeld.nix
-  ./services/networking/bee-clef.nix
   ./services/networking/bee.nix
   ./services/networking/biboumi.nix
   ./services/networking/bind.nix
@@ -1322,6 +1323,7 @@
   ./services/web-apps/mastodon.nix
   ./services/web-apps/matomo.nix
   ./services/web-apps/mattermost.nix
+  ./services/web-apps/mealie.nix
   ./services/web-apps/mediawiki.nix
   ./services/web-apps/meme-bingo-web.nix
   ./services/web-apps/microbin.nix

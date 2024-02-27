@@ -20,8 +20,8 @@ let
   clevisDatasets = map (e: e.device) (filter (e: e.device != null && (hasAttr e.device config.boot.initrd.clevis.devices) && e.fsType == "zfs" && (fsNeededForBoot e)) config.system.build.fileSystems);
 
 
-  inInitrd = any (fs: fs == "zfs") config.boot.initrd.supportedFilesystems;
-  inSystem = any (fs: fs == "zfs") config.boot.supportedFilesystems;
+  inInitrd = config.boot.initrd.supportedFilesystems.zfs or false;
+  inSystem = config.boot.supportedFilesystems.zfs or false;
 
   autosnapPkg = pkgs.zfstools.override {
     zfs = cfgZfs.package;
@@ -588,7 +588,9 @@ in
         kernelParams = lib.optionals (!config.boot.zfs.allowHibernation) [ "nohibernate" ];
 
         extraModulePackages = [
-          (cfgZfs.modulePackage.override { inherit (cfgZfs) removeLinuxDRM; })
+          (cfgZfs.modulePackage.override
+            (lib.optionalAttrs (lib.versionOlder cfgZfs.package.version "2.2.3")
+              { inherit (cfgZfs) removeLinuxDRM; }))
         ];
       };
 
@@ -731,7 +733,7 @@ in
       # this symbol.
       # In the meantime, we restore what was once a working piece of code
       # in the kernel.
-      boot.kernelPatches = lib.optional (cfgZfs.removeLinuxDRM && pkgs.stdenv.hostPlatform.system == "aarch64-linux") {
+      boot.kernelPatches = lib.optional (lib.versionOlder cfgZfs.package.version "2.2.3" && cfgZfs.removeLinuxDRM && pkgs.stdenv.hostPlatform.system == "aarch64-linux") {
         name = "export-neon-symbols-as-gpl";
         patch = pkgs.fetchpatch {
           url = "https://github.com/torvalds/linux/commit/aaeca98456431a8d9382ecf48ac4843e252c07b3.patch";
