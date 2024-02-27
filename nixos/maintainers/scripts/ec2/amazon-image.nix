@@ -43,7 +43,7 @@ in {
 
     sizeMB = mkOption {
       type = with types; either (enum [ "auto" ]) int;
-      default = 2048;
+      default = 3072;
       example = 8192;
       description = lib.mdDoc "The size in MB of the image";
     };
@@ -157,4 +157,6 @@ in {
       '';
     };
   in if config.ec2.zfs.enable then zfsBuilder else extBuilder;
+
+  meta.maintainers = with maintainers; [ arianvp ];
 }

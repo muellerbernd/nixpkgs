@@ -10,13 +10,13 @@
 
 buildGoModule rec {
   pname = "fastly";
-  version = "10.0.1";
+  version = "10.8.3";
 
   src = fetchFromGitHub {
     owner = "fastly";
     repo = "cli";
     rev = "refs/tags/v${version}";
-    hash = "sha256-khGg6TcbyJMn+hiBANhHA6IU6aODTA94AV7yCaELqrs=";
+    hash = "sha256-vxtO1QR3ltDWJc6aktIXiywHDez+djeNs8IQHDMYngc=";
     # The git commit is part of the `fastly version` original output;
     # leave that output the same in nixpkgs. Use the `.git` directory
     # to retrieve the commit SHA, and remove the directory afterwards,
@@ -33,7 +33,7 @@ buildGoModule rec {
     "cmd/fastly"
   ];
 
-  vendorHash = "sha256-WF66oSkH46mA+WLazJ/qgfNSTXBbeWhbeBYIcP2Q3aQ=";
+  vendorHash = "sha256-lTpj9fZ4SJzOdLwIVZxiZCUJxHC41BvwvDOctwckO5k=";
 
   nativeBuildInputs = [
     installShellFiles
@@ -52,8 +52,8 @@ buildGoModule rec {
   ];
   preBuild = let
     cliConfigToml = fetchurl {
-      url = "https://web.archive.org/web/20230412222811/https://developer.fastly.com/api/internal/cli-config";
-      hash = "sha256-NACjeBGOvBL6kUBZtSx4ChZgn7V69f4K2yyDCwTZsbU=";
+      url = "https://web.archive.org/web/20231130153524/https://developer.fastly.com/api/internal/cli-config";
+      hash = "sha256-ZKr6D4DI+lr8FDjfLMgpn4Zq4i5kiwcLEDEScuuCBBw=";
     };
   in ''
     cp ${cliConfigToml} ./pkg/config/config.toml
@@ -78,5 +78,6 @@ buildGoModule rec {
     changelog = "https://github.com/fastly/cli/blob/v${version}/CHANGELOG.md";
     license = licenses.asl20;
     maintainers = with maintainers; [ ereslibre shyim ];
+    mainProgram = "fastly";
   };
 }

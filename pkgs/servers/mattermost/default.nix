@@ -1,39 +1,50 @@
 { lib
 , buildGoModule
 , fetchFromGitHub
+, fetchpatch
 , fetchurl
 , nixosTests
 }:
 
 buildGoModule rec {
   pname = "mattermost";
-  version = "7.8.5";
+  version = "8.1.10";
 
   src = fetchFromGitHub {
     owner = "mattermost";
-    repo = "mattermost-server";
+    repo = "mattermost";
     rev = "v${version}";
-    hash = "sha256-qC6tJcWruiTbWXKuACuhl0kwbRdPVXfUlaFJx4DiQgE=";
-  };
+    hash = "sha256-eloO83koCNZOR/NYzUCdKOtVdF7rk+VrZ9U2bKWkxNU=";
+  } + "/server";
+
+  # this can probably be removed again in versions newer than 8.1.10
+  overrideModAttrs = (_: {
+    preBuild = ''
+      go mod tidy
+    '';
+  });
 
   webapp = fetchurl {
     url = "https://releases.mattermost.com/${version}/mattermost-${version}-linux-amd64.tar.gz";
-    hash = "sha256-ojAGa4tZ5aZp+4XSW6ycDvJ295zH8GaYsA9w6z8n2WM=";
+    hash = "sha256-qxFW/P+INcMKSzaGZtOOr1Mi/glgZeiKvQ+YN0qX070=";
   };
 
-  vendorHash = "sha256-VvGLYOESyoBpFmIibHWxazliHcscMxf3KcQ46NQ4syk=";
+  vendorHash = "sha256-ZbLSxG9Gyhk7PBC2V6sMtrQNXvm+ugMfliFIHWO1VLs=";
 
   subPackages = [ "cmd/mattermost" ];
+
+  tags = [ "production" ];
 
   ldflags = [
     "-s"
     "-w"
-    "-X github.com/mattermost/mattermost-server/v6/model.Version=${version}"
-    "-X github.com/mattermost/mattermost-server/v6/model.BuildNumber=${version}-nixpkgs"
-    "-X github.com/mattermost/mattermost-server/v6/model.BuildDate=1970-01-01"
-    "-X github.com/mattermost/mattermost-server/v6/model.BuildHash=v${version}"
-    "-X github.com/mattermost/mattermost-server/v6/model.BuildHashEnterprise=v${version}"
-    "-X github.com/mattermost/mattermost-server/v6/model.BuildEnterpriseReady=false"
+    "-X github.com/mattermost/mattermost/server/public/model.Version=${version}"
+    "-X github.com/mattermost/mattermost/server/public/model.BuildNumber=${version}-nixpkgs"
+    "-X github.com/mattermost/mattermost/server/public/model.BuildDate=1970-01-01"
+    "-X github.com/mattermost/mattermost/server/public/model.BuildHash=v${version}"
+    "-X github.com/mattermost/mattermost/server/public/model.BuildHashEnterprise=none"
+    "-X github.com/mattermost/mattermost/server/public/model.BuildEnterpriseReady=false"
+    "-X github.com/mattermost/mattermost/server/public/model.MockCWS=false"
   ];
 
   postInstall = ''
@@ -50,6 +61,7 @@ buildGoModule rec {
     description = "Mattermost is an open source platform for secure collaboration across the entire software development lifecycle";
     homepage = "https://www.mattermost.org";
     license = with licenses; [ agpl3 asl20 ];
-    maintainers = with maintainers; [ ryantm numinit kranzes ];
+    maintainers = with maintainers; [ ryantm numinit kranzes mgdelacroix ];
+    mainProgram = "mattermost";
   };
 }

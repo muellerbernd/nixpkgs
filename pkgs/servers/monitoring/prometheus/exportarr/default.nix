@@ -6,16 +6,16 @@
 
 buildGoModule rec {
   pname = "exportarr";
-  version = "1.3.2";
+  version = "1.6.1";
 
   src = fetchFromGitHub {
     owner = "onedr0p";
     repo = "exportarr";
     rev = "v${version}";
-    hash = "sha256-99ap7B5EfMhuSGmT/JNI+CTPv7lTdjxibC0ndYWyNoA=";
+    hash = "sha256-i5ia9GX/0wvLnIwSxZ50y3fTFHwkUzj00+NoEceXp84=";
   };
 
-  vendorHash = "sha256-2Eb8FhbRu5M5u8HGa2bgAvZZkwHycBu8UiNKHG5/fFw=";
+  vendorHash = "sha256-2gzHX7XHzgvZXWm7mfakxnsRfpEysQwnZ0mJocLyyoA=";
 
   subPackages = [ "cmd/exportarr" ];
 

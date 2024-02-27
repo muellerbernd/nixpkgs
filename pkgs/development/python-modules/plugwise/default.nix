@@ -8,30 +8,41 @@
 , freezegun
 , jsonpickle
 , munch
-, mypy
 , pyserial
 , pytest-aiohttp
 , pytest-asyncio
 , pytestCheckHook
 , python-dateutil
 , pythonOlder
-, pytz
 , semver
+, setuptools
+, wheel
 }:
 
 buildPythonPackage rec {
   pname = "plugwise";
-  version = "0.31.4";
-  format = "setuptools";
+  version = "0.37.1";
+  pyproject = true;
 
-  disabled = pythonOlder "3.7";
+  disabled = pythonOlder "3.11";
 
   src = fetchFromGitHub {
-    owner = pname;
+    owner = "plugwise";
     repo = "python-plugwise";
     rev = "refs/tags/v${version}";
-    hash = "sha256-8DcURUJgngmBE6oPquSAHCsL1J2HAqvbtBcrqfrauHk=";
+    hash = "sha256-6o0g3il4GV6E8avp9V2YrkaVPf2z37asdJOxf6Phbmc=";
   };
+
+  postPatch = ''
+    substituteInPlace pyproject.toml \
+      --replace "setuptools~=68.0" "setuptools" \
+      --replace "wheel~=0.40.0" "wheel"
+  '';
+
+  nativeBuildInputs = [
+    setuptools
+    wheel
+  ];
 
   propagatedBuildInputs = [
     aiohttp
@@ -41,14 +52,12 @@ buildPythonPackage rec {
     munch
     pyserial
     python-dateutil
-    pytz
     semver
   ];
 
   nativeCheckInputs = [
     freezegun
     jsonpickle
-    mypy
     pytest-aiohttp
     pytest-asyncio
     pytestCheckHook

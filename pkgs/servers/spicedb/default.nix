@@ -6,16 +6,16 @@
 
 buildGoModule rec {
   pname = "spicedb";
-  version = "1.21.0";
+  version = "1.29.1";
 
   src = fetchFromGitHub {
     owner = "authzed";
     repo = "spicedb";
     rev = "v${version}";
-    hash = "sha256-d/py2tOvcada7hHmllVtxZ2af6GFioW95+eRTepXG7w=";
+    hash = "sha256-fUTJpdFFNf/r+NQYBU4y8sGdtEShF9Yi89aB0rU7Xd8=";
   };
 
-  vendorHash = "sha256-/0EOmnQyD3kOrRmItIgzyK+O7ZOYpUedXdgQjS894uQ=";
+  vendorHash = "sha256-wPQ6RjDldO2m4myKcLtGoe5LurX6FI7yLoWLZUkex4o=";
 
   subPackages = [ "cmd/spicedb" ];
 
@@ -28,5 +28,6 @@ buildGoModule rec {
     homepage = "https://authzed.com/";
     license = licenses.asl20;
     maintainers = with maintainers; [ thoughtpolice ];
+    mainProgram = "spicedb";
   };
 }

@@ -12,19 +12,24 @@
 , pytest-asyncio
 , pytestCheckHook
 , pythonOlder
+, setuptools
 }:
 
 buildPythonPackage rec {
   pname = "google-cloud-pubsub";
-  version = "2.17.1";
-  format = "setuptools";
+  version = "2.19.6";
+  pyproject = true;
 
   disabled = pythonOlder "3.7";
 
   src = fetchPypi {
     inherit pname version;
-    hash = "sha256-BZNCjsuwJJy150G0A+lcPUIbRpfIPrftTBaE3/F2x1M=";
+    hash = "sha256-Tq5LyYRj29rq11l/dmb/4U/GKqvtEOPjIslcsFD6fb4=";
   };
+
+  nativeBuildInputs = [
+    setuptools
+  ];
 
   propagatedBuildInputs = [
     google-api-core
@@ -67,6 +72,6 @@ buildPythonPackage rec {
     homepage = "https://github.com/googleapis/python-pubsub";
     changelog = "https://github.com/googleapis/python-pubsub/blob/v${version}/CHANGELOG.md";
     license = licenses.asl20;
-    maintainers = with maintainers; [ SuperSandro2000 ];
+    maintainers = with maintainers; [ ];
   };
 }

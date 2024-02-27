@@ -24,17 +24,19 @@
 , scdoc
 , vala
 , xvfb-run
+, sassc
+, pantheon
 }:
 
 stdenv.mkDerivation (finalAttrs: rec {
   pname = "SwayNotificationCenter";
-  version = "0.8.0";
+  version = "0.10.0";
 
   src = fetchFromGitHub {
     owner = "ErikReider";
-    repo = "SwayNotificationCenter";
+    repo = pname;
     rev = "v${version}";
-    hash = "sha256-E9CjNx/xzkkOZ39XbfIb1nJFheZVFpj/lwmITKtpb7A=";
+    hash = "sha256-7O+DX4uuncUqx5zEKQprZE6tctteT6NU01V2EBHiFqA=";
   };
 
   nativeBuildInputs = [
@@ -47,6 +49,8 @@ stdenv.mkDerivation (finalAttrs: rec {
     ninja
     pkg-config
     python3
+    sassc
+    pantheon.granite
     scdoc
     vala
     wrapGAppsHook

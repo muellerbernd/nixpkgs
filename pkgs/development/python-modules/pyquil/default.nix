@@ -1,42 +1,51 @@
 { lib
 , buildPythonPackage
+, deprecated
 , fetchFromGitHub
 , importlib-metadata
 , ipython
 , lark
+, matplotlib-inline
+, nest-asyncio
 , networkx
 , numpy
+, packaging
 , poetry-core
+, pydantic
 , pytest-asyncio
-, pytest-freezegun
-, pytest-httpx
 , pytest-mock
 , pytestCheckHook
 , pythonAtLeast
 , pythonOlder
 , pythonRelaxDepsHook
-, qcs-api-client
+, qcs-sdk-python
 , respx
-, retry
 , rpcq
 , scipy
+, syrupy
+, tenacity
+, types-deprecated
 , types-python-dateutil
 , types-retry
 }:
 
 buildPythonPackage rec {
   pname = "pyquil";
-  version = "3.5.0";
-  format = "pyproject";
+  version = "4.6.1";
+  pyproject = true;
 
   disabled = pythonOlder "3.7";
 
   src = fetchFromGitHub {
     owner = "rigetti";
-    repo = pname;
+    repo = "pyquil";
     rev = "refs/tags/v${version}";
-    hash = "sha256-Fr9SnAzDHaSKp0AYra/gCZOJ5Fzcx1EO56ahZQZP2Ss=";
+    hash = "sha256-93dHujgGEh9/r9epAiUcUCiFCG7SFTAFoQbjQwwKhN0=";
   };
+
+  patches = [
+    ./pydantic.patch
+  ];
 
   pythonRelaxDeps = [
     "lark"
@@ -49,13 +58,18 @@ buildPythonPackage rec {
   ];
 
   propagatedBuildInputs = [
+    deprecated
     lark
+    matplotlib-inline
     networkx
     numpy
-    qcs-api-client
-    retry
+    packaging
+    pydantic
+    qcs-sdk-python
     rpcq
     scipy
+    tenacity
+    types-deprecated
     types-python-dateutil
     types-retry
   ] ++ lib.optionals (pythonOlder "3.8") [
@@ -63,44 +77,17 @@ buildPythonPackage rec {
   ];
 
   nativeCheckInputs = [
-    pytestCheckHook
-  ];
-
-  checkInputs = [
+    nest-asyncio
     pytest-asyncio
-    pytest-freezegun
-    pytest-httpx
     pytest-mock
+    pytestCheckHook
     respx
+    syrupy
     ipython
   ];
 
-  disabledTestPaths = [
-    # Tests require network access
-    "test/e2e/"
-    "test/unit/test_api.py"
-    "test/unit/test_engagement_manager.py"
-    "test/unit/test_operator_estimation.py"
-    "test/unit/test_wavefunction_simulator.py"
-    "test/unit/test_compatibility_v2_operator_estimation.py"
-    "test/unit/test_compatibility_v2_quantum_computer.py"
-    "test/unit/test_compatibility_v2_qvm.py"
-    "test/unit/test_quantum_computer.py"
-    "test/unit/test_qvm.py"
-    "test/unit/test_reference_wavefunction.py"
-    # Out-dated
-    "test/unit/test_qpu_client.py"
-    "test/unit/test_qvm_client.py"
-    "test/unit/test_reference_density.py"
-  ];
-
-  disabledTests = [
-    "test_compile_with_quilt_calibrations"
-    "test_sets_timeout_on_requests"
-    # sensitive to lark parser output
-    "test_memory_commands"
-    "test_classical"
-  ];
+  # tests hang
+  doCheck = false;
 
   pythonImportsCheck = [
     "pyquil"

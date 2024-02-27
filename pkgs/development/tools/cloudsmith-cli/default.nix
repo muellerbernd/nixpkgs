@@ -1,16 +1,17 @@
 { lib
 , python3
+, fetchPypi
 }:
 
 python3.pkgs.buildPythonApplication rec {
   pname = "cloudsmith-cli";
-  version = "0.35.2";
+  version = "1.1.1";
   format = "wheel";
 
-  src = python3.pkgs.fetchPypi {
+  src = fetchPypi {
     pname = "cloudsmith_cli";
     inherit format version;
-    hash = "sha256-+M4CPveS9dltMI291Atm84T/cf4dPOO3wPvPI15E73Y=";
+    hash = "sha256-evwXXGmGa6V2LhgkmX04E5VvdPxeZzvl4F28auXcSng=";
   };
 
   propagatedBuildInputs = with python3.pkgs; [

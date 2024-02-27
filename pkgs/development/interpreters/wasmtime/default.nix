@@ -2,23 +2,24 @@
 
 rustPlatform.buildRustPackage rec {
   pname = "wasmtime";
-  version = "9.0.0";
+  version = "18.0.1";
 
   src = fetchFromGitHub {
     owner = "bytecodealliance";
     repo = pname;
     rev = "v${version}";
-    hash = "sha256-9ga7BKJoaw7naX8t4o+zNnWkjIvSII5oVRM0dYMrseo=";
+    hash = "sha256-wCaDwaD/Xvm++PCrDmXo2Nqn9z07et8AhSI1e1527vc=";
     fetchSubmodules = true;
   };
 
-  cargoHash = "sha256-GkL78aAIGdSlcxeRTIVp1jcXIg1ZtvB2LNIoPEViNcs=";
-
+  # Disable cargo-auditable until https://github.com/rust-secure-code/cargo-auditable/issues/124 is solved.
+  auditable = false;
+  cargoHash = "sha256-4fKJD3YmwFrHk38PUrpn4BDFkByylqRgPmuVHcVxdSI=";
   cargoBuildFlags = [ "--package" "wasmtime-cli" "--package" "wasmtime-c-api" ];
 
   outputs = [ "out" "dev" ];
 
-  buildInputs = lib.optionals stdenv.isDarwin [ Security ];
+  buildInputs = lib.optional stdenv.isDarwin Security;
 
   # SIMD tests are only executed on platforms that support all
   # required processor features (e.g. SSE3, SSSE3 and SSE4.1 on x86_64):
@@ -36,14 +37,20 @@ rustPlatform.buildRustPackage rec {
     install -m0644 $src/crates/c-api/include/*.h $dev/include
     install -m0644 $src/crates/c-api/include/wasmtime/*.h $dev/include/wasmtime
     install -m0644 $src/crates/c-api/wasm-c-api/include/* $dev/include
+  '' + lib.optionalString stdenv.isDarwin ''
+    install_name_tool -id \
+      $dev/lib/libwasmtime.dylib \
+      $dev/lib/libwasmtime.dylib
   '';
 
   meta = with lib; {
     description =
       "Standalone JIT-style runtime for WebAssembly, using Cranelift";
-    homepage = "https://github.com/bytecodealliance/wasmtime";
+    homepage = "https://wasmtime.dev/";
     license = licenses.asl20;
+    mainProgram = "wasmtime";
     maintainers = with maintainers; [ ereslibre matthewbauer ];
     platforms = platforms.unix;
+    changelog = "https://github.com/bytecodealliance/wasmtime/blob/v${version}/RELEASES.md";
   };
 }

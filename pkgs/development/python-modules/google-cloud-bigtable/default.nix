@@ -11,19 +11,24 @@
 , protobuf
 , pytestCheckHook
 , pythonOlder
+, setuptools
 }:
 
 buildPythonPackage rec {
   pname = "google-cloud-bigtable";
-  version = "2.18.1";
-  format = "setuptools";
+  version = "2.23.0";
+  pyproject = true;
 
   disabled = pythonOlder "3.7";
 
   src = fetchPypi {
     inherit pname version;
-    hash = "sha256-Qdb3AnwHS2nho3ld0oehVkORAy+F3xzEqHuSJQb18OI=";
+    hash = "sha256-w8q7Zhn18u6hGz23JzHoTSixaAVcnMF8LS2v8Vy4I3k=";
   };
+
+  nativeBuildInputs = [
+    setuptools
+  ];
 
   propagatedBuildInputs = [
     google-api-core
@@ -65,6 +70,6 @@ buildPythonPackage rec {
     homepage = "https://github.com/googleapis/python-bigtable";
     changelog = "https://github.com/googleapis/python-bigtable/blob/v${version}/CHANGELOG.md";
     license = licenses.asl20;
-    maintainers = with maintainers; [ costrouc ];
+    maintainers = with maintainers; [ ];
   };
 }

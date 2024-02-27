@@ -2,7 +2,7 @@
 , stdenv
 , fetchFromGitHub
 , python3Packages
-, ffmpeg
+, ffmpeg-headless
 , makeWrapper
 , nixosTests
 , nodejs
@@ -53,6 +53,11 @@ stdenv.mkDerivation rec {
     # We can't update the package at runtime with NixOS, so this patch makes
     # the !update command mention that
     ./no-runtime-update.patch
+
+    # Fix passing of invalid "git" version into version.parse, which results
+    # in an InvalidVersion exception. The upstream fix is insufficient, so
+    # we carry the correct patch downstream for now.
+    ./catch-invalid-versions.patch
   ];
 
   postPatch = ''
@@ -60,7 +65,8 @@ stdenv.mkDerivation rec {
     # configuration.default.ini, which is in the installation directory
     # after all. So we need to counter-patch it here so it can find it absolutely
     substituteInPlace mumbleBot.py \
-      --replace "configuration.default.ini" "$out/share/botamusique/configuration.default.ini"
+      --replace "configuration.default.ini" "$out/share/botamusique/configuration.default.ini" \
+      --replace "version = 'git'" "version = '${version}'"
   '';
 
   NODE_OPTIONS = "--openssl-legacy-provider";
@@ -109,7 +115,7 @@ stdenv.mkDerivation rec {
 
     # Convenience binary and wrap with ffmpeg dependency
     makeWrapper $out/share/botamusique/mumbleBot.py $out/bin/botamusique \
-      --prefix PATH : ${lib.makeBinPath [ ffmpeg ]}
+      --prefix PATH : ${lib.makeBinPath [ ffmpeg-headless ]}
 
     runHook postInstall
   '';
@@ -146,5 +152,6 @@ stdenv.mkDerivation rec {
     license = licenses.mit;
     platforms = platforms.all;
     maintainers = with maintainers; [ infinisil ];
+    mainProgram = "botamusique";
   };
 }

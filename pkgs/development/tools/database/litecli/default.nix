@@ -1,15 +1,16 @@
 { lib
 , python3Packages
+, fetchPypi
 }:
 
 python3Packages.buildPythonApplication rec {
   pname = "litecli";
-  version = "1.9.0";
+  version = "1.10.0";
   disabled = python3Packages.pythonOlder "3.4";
 
-  src = python3Packages.fetchPypi {
+  src = fetchPypi {
     inherit pname version;
-    sha256 = "sha256-Ia8s+gg91N8ePMqiohFxKbXxchJ1b1luoJDilndsJ6E=";
+    sha256 = "sha256-7p4qk9GTpVXA5mHtCDlDpvkyqcjowme2ibRp+ax6Pgw=";
   };
 
   propagatedBuildInputs = with python3Packages; [

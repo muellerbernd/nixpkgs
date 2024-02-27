@@ -1,23 +1,27 @@
 { lib
 , buildPythonPackage
+, fetchpatch
 , fetchPypi
 , poetry-core
 , pythonOlder
-, requests
 , aiohttp
 , backoff
+, fastavro
+, importlib-metadata
+, requests
+, urllib3
 }:
 
 buildPythonPackage rec {
   pname = "cohere";
-  version = "4.5.1";
-  format = "pyproject";
+  version = "4.49";
+  pyproject = true;
 
   disabled = pythonOlder "3.7";
 
   src = fetchPypi {
     inherit pname version;
-    hash = "sha256-+/oeZpYyCrQava0lEt5uLlSc65XaBCyI/G/lwAxfBTA=";
+    hash = "sha256-UJ6BxE+OG06zGyfY6jiOeeBMW+6DCKwaM3pgU90/Woc=";
   };
 
   nativeBuildInputs = [
@@ -25,9 +29,12 @@ buildPythonPackage rec {
   ];
 
   propagatedBuildInputs = [
-    requests
     aiohttp
     backoff
+    fastavro
+    importlib-metadata
+    requests
+    urllib3
   ];
 
   # tests require CO_API_KEY

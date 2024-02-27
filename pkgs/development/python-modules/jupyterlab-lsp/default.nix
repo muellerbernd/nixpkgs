@@ -1,18 +1,24 @@
 { lib
 , buildPythonPackage
 , fetchPypi
+, setuptools
 , jupyterlab
 , jupyter-lsp
 }:
 
 buildPythonPackage rec {
   pname = "jupyterlab-lsp";
-  version = "4.0.1";
+  version = "5.0.3";
+  pyproject = true;
 
   src = fetchPypi {
     inherit pname version;
-    hash = "sha256-1VPRfs+F24h2xJeoJglZQpuCcPDk6Ptf8cWrAW3G5to=";
+    hash = "sha256-qcijpkZJS+SE1+MXSrHSQV7WD0dzzshHmqW6N+XwS8k=";
   };
+
+  nativeBuildInputs = [
+    setuptools
+  ];
 
   propagatedBuildInputs = [
     jupyterlab

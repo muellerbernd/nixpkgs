@@ -5,9 +5,10 @@
 , closureInfo
 , coreutils
 , e2fsprogs
-, fakechroot
+, proot
 , fakeNss
 , fakeroot
+, file
 , go
 , jq
 , jshon
@@ -34,6 +35,7 @@
 , writeText
 , writeTextDir
 , writePython3
+, zstd
 }:
 
 let
@@ -75,6 +77,30 @@ let
   # For the mapping from Nixpkgs system parameters to GOARCH, we can reuse the
   # mapping from the go package.
   defaultArchitecture = go.GOARCH;
+
+  compressors = {
+    none = {
+      ext = "";
+      nativeInputs = [ ];
+      compress = "cat";
+      decompress = "cat";
+    };
+    gz = {
+      ext = ".gz";
+      nativeInputs = [ pigz ];
+      compress = "pigz -p$NIX_BUILD_CORES -nTR";
+      decompress = "pigz -d -p$NIX_BUILD_CORES";
+    };
+    zstd = {
+      ext = ".zst";
+      nativeInputs = [ zstd ];
+      compress = "zstd -T$NIX_BUILD_CORES";
+      decompress = "zstd -d -T$NIX_BUILD_CORES";
+    };
+  };
+
+  compressorForImage = compressor: imageName: compressors.${compressor} or
+    (throw "in docker image ${imageName}: compressor must be one of: [${toString builtins.attrNames compressors}]");
 
 in
 rec {
@@ -446,7 +472,7 @@ rec {
       '';
 
       postMount = ''
-        mkdir -p mnt/{dev,proc,sys} mnt${storeDir}
+        mkdir -p mnt/{dev,proc,sys,tmp} mnt${storeDir}
 
         # Mount /dev, /sys and the nix store as shared folders.
         mount --rbind /dev mnt/dev
@@ -487,16 +513,18 @@ rec {
       '';
     };
 
-  buildLayeredImage = { name, ... }@args:
+  buildLayeredImage = lib.makeOverridable ({ name, compressor ? "gz", ... }@args:
     let
       stream = streamLayeredImage args;
+      compress = compressorForImage compressor name;
     in
-    runCommand "${baseNameOf name}.tar.gz"
+    runCommand "${baseNameOf name}.tar${compress.ext}"
       {
         inherit (stream) imageName;
         passthru = { inherit (stream) imageTag; };
-        nativeBuildInputs = [ pigz ];
-      } "${stream} | pigz -nTR > $out";
+        nativeBuildInputs = compress.nativeInputs;
+      } "${stream} | ${compress.compress} > $out"
+  );
 
   # 1. extract the base image
   # 2. create the layer
@@ -504,7 +532,7 @@ rec {
   # 4. compute the layer id
   # 5. put the layer in the image
   # 6. repack the image
-  buildImage =
+  buildImage = lib.makeOverridable (
     args@{
       # Image name.
       name
@@ -538,6 +566,8 @@ rec {
       buildVMMemorySize ? 512
     , # Time of creation of the image.
       created ? "1970-01-01T00:00:01Z"
+    , # Compressor to use. One of: none, gz, zstd.
+      compressor ? "gz"
     , # Deprecated.
       contents ? null
     ,
@@ -573,6 +603,8 @@ rec {
         in
         if created == "now" then impure else pure;
 
+      compress = compressorForImage compressor name;
+
       layer =
         if runAsRoot == null
         then
@@ -589,12 +621,12 @@ rec {
               extraCommands;
             copyToRoot = rootContents;
           };
-      result = runCommand "docker-image-${baseName}.tar.gz"
+      result = runCommand "docker-image-${baseName}.tar${compress.ext}"
         {
-          nativeBuildInputs = [ jshon pigz jq moreutils ];
+          nativeBuildInputs = [ jshon jq moreutils ] ++ compress.nativeInputs;
           # Image name must be lowercase
           imageName = lib.toLower name;
-          imageTag = if tag == null then "" else tag;
+          imageTag = lib.optionalString (tag != null) tag;
           inherit fromImage baseJson;
           layerClosure = writeReferencesToFile layer;
           passthru.buildArgs = args;
@@ -745,13 +777,14 @@ rec {
         chmod -R a-w image
 
         echo "Cooking the image..."
-        tar -C image --hard-dereference --sort=name --mtime="@$SOURCE_DATE_EPOCH" --owner=0 --group=0 --xform s:'^./':: -c . | pigz -nTR > $out
+        tar -C image --hard-dereference --sort=name --mtime="@$SOURCE_DATE_EPOCH" --owner=0 --group=0 --xform s:'^./':: -c . | ${compress.compress} > $out
 
         echo "Finished."
       '';
 
     in
-    checked result;
+    checked result
+  );
 
   # Merge the tarballs of images built with buildImage into a single
   # tarball that contains all images. Running `docker load` on the resulting
@@ -759,16 +792,28 @@ rec {
   mergeImages = images: runCommand "merge-docker-images"
     {
       inherit images;
-      nativeBuildInputs = [ pigz jq ];
+      nativeBuildInputs = [ file jq ]
+        ++ compressors.none.nativeInputs
+        ++ compressors.gz.nativeInputs
+        ++ compressors.zstd.nativeInputs;
     } ''
     mkdir image inputs
     # Extract images
     repos=()
     manifests=()
+    last_image_mime="application/gzip"
     for item in $images; do
       name=$(basename $item)
       mkdir inputs/$name
-      tar -I pigz -xf $item -C inputs/$name
+
+      last_image_mime=$(file --mime-type -b $item)
+      case $last_image_mime in
+        "application/x-tar") ${compressors.none.decompress};;
+        "application/zstd") ${compressors.zstd.decompress};;
+        "application/gzip") ${compressors.gz.decompress};;
+        *) echo "error: unexpected layer type $last_image_mime" >&2; exit 1;;
+      esac < $item | tar -xC inputs/$name
+
       if [ -f inputs/$name/repositories ]; then
         repos+=(inputs/$name/repositories)
       fi
@@ -777,7 +822,7 @@ rec {
       fi
     done
     # Copy all layers from input images to output image directory
-    cp -R --no-clobber inputs/*/* image/
+    cp -R --update=none inputs/*/* image/
     # Merge repositories objects and manifests
     jq -s add "''${repos[@]}" > repositories
     jq -s add "''${manifests[@]}" > manifest.json
@@ -785,7 +830,14 @@ rec {
     mv repositories image/repositories
     mv manifest.json image/manifest.json
     # Create tarball and gzip
-    tar -C image --hard-dereference --sort=name --mtime="@$SOURCE_DATE_EPOCH" --owner=0 --group=0 --xform s:'^./':: -c . | pigz -nTR > $out
+    tar -C image --hard-dereference --sort=name --mtime="@$SOURCE_DATE_EPOCH" --owner=0 --group=0 --xform s:'^./':: -c . | (
+      case $last_image_mime in
+        "application/x-tar") ${compressors.none.compress};;
+        "application/zstd") ${compressors.zstd.compress};;
+        "application/gzip") ${compressors.gz.compress};;
+        # `*)` not needed; already checked.
+      esac
+    ) > $out
   '';
 
 
@@ -803,6 +855,7 @@ rec {
   '';
 
   # This provides /bin/sh, pointing to bashInteractive.
+  # The use of bashInteractive here is intentional to support cases like `docker run -it <image_name>`, so keep these use cases in mind if making any changes to how this works.
   binSh = runCommand "bin-sh" { } ''
     mkdir -p $out/bin
     ln -s ${bashInteractive}/bin/bash $out/bin/sh
@@ -837,7 +890,7 @@ rec {
     })
   );
 
-  streamLayeredImage =
+  streamLayeredImage = lib.makeOverridable (
     {
       # Image Name
       name
@@ -887,6 +940,13 @@ rec {
         });
 
         contentsList = if builtins.isList contents then contents else [ contents ];
+        bind-paths = builtins.toString (builtins.map (path: "--bind=${path}:${path}!") [
+          "/dev/"
+          "/proc/"
+          "/sys/"
+          "${builtins.storeDir}/"
+          "$out/layer.tar"
+        ]);
 
         # We store the customisation layer as a tarball, to make sure that
         # things like permissions set on 'extraCommands' are not overridden
@@ -898,31 +958,38 @@ rec {
           nativeBuildInputs = [
             fakeroot
           ] ++ optionals enableFakechroot [
-            fakechroot
-            # for chroot
-            coreutils
-            # fakechroot needs getopt, which is provided by util-linux
-            util-linux
+            proot
           ];
           postBuild = ''
             mv $out old_out
             (cd old_out; eval "$extraCommands" )
 
             mkdir $out
-            ${optionalString enableFakechroot ''
-              export FAKECHROOT_EXCLUDE_PATH=/dev:/proc:/sys:${builtins.storeDir}:$out/layer.tar
+            ${if enableFakechroot then ''
+              proot -r $PWD/old_out ${bind-paths} --pwd=/ fakeroot bash -c '
+                source $stdenv/setup
+                eval "$fakeRootCommands"
+                tar \
+                  --sort name \
+                  --exclude=./proc \
+                  --exclude=./sys \
+                  --exclude=.${builtins.storeDir} \
+                  --numeric-owner --mtime "@$SOURCE_DATE_EPOCH" \
+                  --hard-dereference \
+                  -cf $out/layer.tar .
+              '
+            '' else ''
+              fakeroot bash -c '
+                source $stdenv/setup
+                cd old_out
+                eval "$fakeRootCommands"
+                tar \
+                  --sort name \
+                  --numeric-owner --mtime "@$SOURCE_DATE_EPOCH" \
+                  --hard-dereference \
+                  -cf $out/layer.tar .
+              '
             ''}
-            ${optionalString enableFakechroot ''fakechroot chroot $PWD/old_out ''}fakeroot bash -c '
-              source $stdenv/setup
-              ${optionalString (!enableFakechroot) ''cd old_out''}
-              eval "$fakeRootCommands"
-              tar \
-                --sort name \
-                --numeric-owner --mtime "@$SOURCE_DATE_EPOCH" \
-                --hard-dereference \
-                -cf $out/layer.tar .
-            '
-
             sha256sum $out/layer.tar \
               | cut -f 1 -d ' ' \
               > $out/checksum
@@ -1046,7 +1113,8 @@ rec {
           makeWrapper ${streamScript} $out --add-flags ${conf}
         '';
       in
-      result;
+      result
+  );
 
   # This function streams a docker image that behaves like a nix-shell for a derivation
   streamNixShellImage =
@@ -1221,14 +1289,15 @@ rec {
       };
 
   # Wrapper around streamNixShellImage to build an image from the result
-  buildNixShellImage = { drv, ... }@args:
+  buildNixShellImage = { drv, compressor ? "gz", ... }@args:
     let
       stream = streamNixShellImage args;
+      compress = compressorForImage compressor drv.name;
     in
-    runCommand "${drv.name}-env.tar.gz"
+    runCommand "${drv.name}-env.tar${compress.ext}"
       {
         inherit (stream) imageName;
         passthru = { inherit (stream) imageTag; };
-        nativeBuildInputs = [ pigz ];
-      } "${stream} | pigz -nTR > $out";
+        nativeBuildInputs = compress.nativeInputs;
+      } "${stream} | ${compress.compress} > $out";
 }

@@ -1,6 +1,6 @@
 { lib
 , python3
-, fetchFromGitHub
+, fetchPypi
 }:
 
 with python3.pkgs;
@@ -8,7 +8,7 @@ with python3.pkgs;
 buildPythonPackage rec {
   pname = "shell-genie";
   version = "0.2.10";
-  format = "pyproject";
+  pyproject = true;
 
   src = fetchPypi {
     pname = "shell_genie";
@@ -16,8 +16,14 @@ buildPythonPackage rec {
     hash = "sha256-z7LiAq2jLzqjg4Q/r9o7M6VbedeT34NyPpgctfqBp+8=";
   };
 
+  pythonRelaxDeps = [
+    "openai"
+    "typer"
+  ];
+
   nativeBuildInputs = [
     poetry-core
+    pythonRelaxDepsHook
   ];
 
   propagatedBuildInputs = [

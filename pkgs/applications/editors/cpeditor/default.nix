@@ -13,13 +13,13 @@
 
 stdenv.mkDerivation rec {
   pname = "cpeditor";
-  version = "6.11.1";
+  version = "6.11.2";
 
   src = fetchFromGitHub {
     owner = "cpeditor";
     repo = "cpeditor";
     rev = version;
-    sha256 = "sha256-Uwo7ZE+9yrHV/+D6rvfew2d3ZJbpFOjgek38iYkPppw=";
+    sha256 = "sha256-zotbXzRjIwZdYluJiz6GWUIOXl/wz1TWt+dcTwMhURo=";
     fetchSubmodules = true;
   };
 
@@ -30,11 +30,14 @@ stdenv.mkDerivation rec {
     substituteInPlace src/Core/Runner.cpp --replace "/bin/bash" "${runtimeShell}"
   '';
 
+  env.NIX_CFLAGS_COMPILE = "-std=c++14";
+
   meta = with lib; {
     description = "An IDE specially designed for competitive programming";
     homepage = "https://cpeditor.org";
     license = licenses.gpl3Plus;
     platforms = platforms.linux;
     maintainers = with maintainers; [ rewine ];
+    mainProgram = "cpeditor";
   };
 }

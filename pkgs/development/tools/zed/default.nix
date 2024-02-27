@@ -7,16 +7,16 @@
 
 buildGoModule rec {
   pname = "zed";
-  version = "1.7.0";
+  version = "1.14.0";
 
   src = fetchFromGitHub {
     owner = "brimdata";
     repo = pname;
     rev = "v${version}";
-    sha256 = "sha256-laqHFrRp83IE75RgAmxxTsq7c48RDapAJQFXWI1NO2o=";
+    sha256 = "sha256-1k5qw/uWe5gtDUjDcMW54ezoXOBLt4T9lRmiOS06hz8=";
   };
 
-  vendorHash = "sha256-Uy8GR+mNVElx+MOu8IxHjBhp1GT5nLqqizQH9q1s0wA=";
+  vendorHash = "sha256-X1rE6/sgpB6jeTjLZJL/a7ghjRJYTXSQDHB4PmEFUmU=";
 
   subPackages = [ "cmd/zed" "cmd/zq" ];
 

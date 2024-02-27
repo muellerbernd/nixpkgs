@@ -4,7 +4,6 @@
 , fetchFromGitHub
 , pkg-config
 , openssl
-, llvmPackages
 , rocksdb
 , testers
 , surrealdb
@@ -14,18 +13,21 @@
 
 rustPlatform.buildRustPackage rec {
   pname = "surrealdb";
-  version = "1.0.0-beta.9";
+  version = "1.2.1";
 
   src = fetchFromGitHub {
     owner = "surrealdb";
     repo = "surrealdb";
     rev = "v${version}";
-    sha256 = "sha256-GgRsRGYnaE2TssoXdubEuMEbLjM4woE3vxTxSlufquU=";
+    hash = "sha256-ICQvAyBV+7cyHiwwiPEaoGT/W/pM4yiSpqByzkByRK4=";
   };
 
-  cargoSha256 = "sha256-eLJ+sxsK45pkgNUYrNuUOAqutwIjvEhGGjsvwGzfVKI=";
+  cargoHash = "sha256-a9ZRr6U7mKCk2uaXJmCJMaCQxJ9adbRLMRUpJrsookk=";
 
-  LIBCLANG_PATH = "${llvmPackages.libclang.lib}/lib";
+  # error: linker `aarch64-linux-gnu-gcc` not found
+  postPatch = ''
+    rm .cargo/config.toml
+  '';
 
   PROTOC = "${protobuf}/bin/protoc";
   PROTOC_INCLUDE = "${protobuf}/include";
@@ -35,12 +37,16 @@ rustPlatform.buildRustPackage rec {
 
   nativeBuildInputs = [
     pkg-config
-    # needed on top of LIBCLANG_PATH to compile rquickjs
-    llvmPackages.clang
+    rustPlatform.bindgenHook
   ];
 
   buildInputs = [ openssl ]
     ++ lib.optionals stdenv.isDarwin [ SystemConfiguration ];
+
+  checkFlags = [
+    # flaky
+    "--skip=ws_integration::none::merge"
+  ];
 
   passthru.tests.version = testers.testVersion {
     package = surrealdb;

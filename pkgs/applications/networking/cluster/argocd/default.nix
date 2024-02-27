@@ -2,17 +2,17 @@
 
 buildGoModule rec {
   pname = "argocd";
-  version = "2.7.2";
+  version = "2.10.1";
 
   src = fetchFromGitHub {
     owner = "argoproj";
     repo = "argo-cd";
     rev = "v${version}";
-    sha256 = "sha256-pmF0EJfidYRZRelvXLfwANbv+DnfgLXVeKfjRSbnKjY=";
+    hash = "sha256-sQbRrNTeLUSal9gBAnqx+x0glPykjw0DN+j7xHoZcLY=";
   };
 
   proxyVendor = true; # darwin/linux hash mismatch
-  vendorHash = "sha256-VRbNzJANWA7MjomzxNRK19Q4L+fsztMpumUbdYszYqw=";
+  vendorHash = "sha256-WVufVd8E2rVBA59qEYdRq38W70lApMGZV/26jhn5HGw=";
 
   # Set target as ./cmd per cli-local
   # https://github.com/argoproj/argo-cd/blob/master/Makefile#L227
@@ -59,6 +59,6 @@ buildGoModule rec {
     downloadPage = "https://github.com/argoproj/argo-cd";
     homepage = "https://argo-cd.readthedocs.io/en/stable/";
     license = licenses.asl20;
-    maintainers = with maintainers; [ shahrukh330 bryanasdev000 ];
+    maintainers = with maintainers; [ shahrukh330 bryanasdev000 qjoly ];
   };
 }

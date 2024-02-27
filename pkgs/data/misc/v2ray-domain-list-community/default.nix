@@ -3,14 +3,14 @@
 let
   generator = pkgsBuildBuild.buildGoModule rec {
     pname = "v2ray-domain-list-community";
-    version = "20230517022917";
+    version = "20240217140518";
     src = fetchFromGitHub {
       owner = "v2fly";
       repo = "domain-list-community";
       rev = version;
-      hash = "sha256-oRmVJyDfdJhAdF9nJrJs2SjoUs1pr39/xcCps5d3WyM=";
+      hash = "sha256-7Voepx8+tFWpugtUKoRJ55nSX3cWtXgPhYiNDhE3OGs=";
     };
-    vendorHash = "sha256-zkf2neI1HiPkCrcw+cYoZ2L/OGkM8HPIv5gUqc05Wak=";
+    vendorHash = "sha256-azvMUi8eLNoNofRa2X4SKTTiMd6aOyO6H/rOiKjkpIY=";
     meta = with lib; {
       description = "community managed domain list";
       homepage = "https://github.com/v2fly/domain-list-community";
@@ -23,7 +23,7 @@ stdenv.mkDerivation {
   inherit (generator) pname version src meta;
   buildPhase = ''
     runHook preBuild
-    ${generator}/bin/domain-list-community -datapath $src/data --exportlists=category-ads-all,tld-cn,cn,tld-\!cn,geolocation-\!cn,apple,icloud
+    ${generator}/bin/domain-list-community -datapath $src/data
     runHook postBuild
   '';
   installPhase = ''

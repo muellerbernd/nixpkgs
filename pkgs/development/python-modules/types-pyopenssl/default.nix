@@ -6,13 +6,13 @@
 
 buildPythonPackage rec {
   pname = "types-pyopenssl";
-  version = "23.0.0.4";
+  version = "24.0.0.20240130";
   format = "setuptools";
 
   src = fetchPypi {
     pname = "types-pyOpenSSL";
     inherit version;
-    hash = "sha256-izVQtuGdUc54qr1ySw2OvZYggaX86V5/haWS3828Fr8=";
+    hash = "sha256-yBLlwcNSSfde9ZNXCLKpl9Yqv5dFviIuX5S5WVRyqyU=";
   };
 
   propagatedBuildInputs = [

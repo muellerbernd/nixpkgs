@@ -2,13 +2,13 @@
 
 stdenv.mkDerivation rec {
   pname = "mergerfs";
-  version = "2.35.1";
+  version = "2.40.0";
 
   src = fetchFromGitHub {
     owner = "trapexit";
     repo = pname;
     rev = version;
-    sha256 = "sha256-mUnjWMxeZJ9wIpJJDqQIUk2x7oifZ/b2HZlPtQ77q8U=";
+    sha256 = "sha256-3iMFobefP0vF8Ywt0KpS6ZhH+T1GSQu0GzV4A78FmaY=";
   };
 
   nativeBuildInputs = [
@@ -36,6 +36,6 @@ stdenv.mkDerivation rec {
     homepage = "https://github.com/trapexit/mergerfs";
     license = lib.licenses.isc;
     platforms = lib.platforms.linux;
-    maintainers = with lib.maintainers; [ jfrankenau makefu ];
+    maintainers = with lib.maintainers; [ makefu ];
   };
 }

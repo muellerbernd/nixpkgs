@@ -8,19 +8,24 @@
 , pytest-asyncio
 , pytestCheckHook
 , pythonOlder
+, setuptools
 }:
 
 buildPythonPackage rec {
   pname = "google-cloud-secret-manager";
-  version = "2.16.1";
-  format = "setuptools";
+  version = "2.18.1";
+  pyproject = true;
 
   disabled = pythonOlder "3.7";
 
   src = fetchPypi {
     inherit pname version;
-    hash = "sha256-FJ0Rzpvn6oHUrDVE0/zUxxap7bLLd12cB1IxVwsHn7s=";
+    hash = "sha256-MQVV88jLl39KRtRFTsosg/7WoJ88SzW4T2+h+P71UCQ=";
   };
+
+  nativeBuildInputs = [
+    setuptools
+  ];
 
   propagatedBuildInputs = [
     google-api-core
@@ -42,9 +47,9 @@ buildPythonPackage rec {
 
   meta = with lib; {
     description = "Secret Manager API API client library";
-    homepage = "https://github.com/googleapis/python-secret-manager";
-    changelog = "https://github.com/googleapis/python-secret-manager/blob/v${version}/CHANGELOG.md";
+    homepage = "https://github.com/googleapis/google-cloud-python/tree/main/packages/google-cloud-secret-manager";
+    changelog = "https://github.com/googleapis/google-cloud-python/blob/google-cloud-secret-manager-v${version}/packages/google-cloud-secret-manager/CHANGELOG.md";
     license = licenses.asl20;
-    maintainers = with maintainers; [ siriobalmelli SuperSandro2000 ];
+    maintainers = with maintainers; [ siriobalmelli ];
   };
 }
