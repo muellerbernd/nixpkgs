@@ -3552,10 +3552,6 @@ with pkgs;
 
   biscuit-cli = callPackage ../tools/security/biscuit-cli { };
 
-  bitwarden = callPackage ../tools/security/bitwarden { };
-
-  bitwarden-cli = callPackage ../tools/security/bitwarden/cli.nix { };
-
   inherit (callPackages ../tools/security/bitwarden-directory-connector { }) bitwarden-directory-connector-cli bitwarden-directory-connector;
 
   bitwarden-menu = python3Packages.callPackage ../applications/misc/bitwarden-menu { };
@@ -4505,11 +4501,6 @@ with pkgs;
   bwbasic = callPackage ../development/interpreters/bwbasic { };
 
   bws = callPackage ../tools/security/bws { };
-
-  byobu = callPackage ../tools/misc/byobu {
-    # Choices: [ tmux screen ];
-    textual-window-manager = tmux;
-  };
 
   bsh = fetchurl {
     url = "http://www.beanshell.org/bsh-2.0b5.jar";
@@ -19386,8 +19377,6 @@ with pkgs;
 
   lenmus = callPackage ../applications/misc/lenmus { };
 
-  lightningcss = callPackage ../development/tools/lightningcss { };
-
   libtool = libtool_2;
 
   libtool_1_5 = callPackage ../development/tools/misc/libtool { };
@@ -26418,7 +26407,7 @@ with pkgs;
 
   matrix-alertmanager = callPackage ../servers/monitoring/matrix-alertmanager { };
 
-  mattermost = callPackage ../servers/mattermost { };
+  mattermost = callPackage ../servers/mattermost { buildGoModule = buildGo122Module; };
   matterircd = callPackage ../servers/mattermost/matterircd.nix { };
   matterbridge = callPackage ../servers/matterbridge { };
 
@@ -27895,8 +27884,6 @@ with pkgs;
   linux_5_15_hardened = linuxKernel.kernels.linux_5_15_hardened;
   linuxPackages_6_1_hardened = linuxKernel.packages.linux_6_1_hardened;
   linux_6_1_hardened = linuxKernel.kernels.linux_6_1_hardened;
-  linuxPackages_6_5_hardened = linuxKernel.packages.linux_6_5_hardened;
-  linux_6_5_hardened = linuxKernel.kernels.linux_6_5_hardened;
   linuxPackages_6_6_hardened = linuxKernel.packages.linux_6_6_hardened;
   linux_6_6_hardened = linuxKernel.kernels.linux_6_6_hardened;
   linuxPackages_6_7_hardened = linuxKernel.packages.linux_6_7_hardened;
@@ -32119,7 +32106,9 @@ with pkgs;
 
   hexedit = callPackage ../applications/editors/hexedit { };
 
-  himalaya = callPackage ../applications/networking/mailreaders/himalaya { };
+  himalaya = callPackage ../applications/networking/mailreaders/himalaya {
+    inherit (darwin.apple_sdk.frameworks) AppKit Cocoa Security;
+  };
 
   hydrogen-web-unwrapped = callPackage ../applications/networking/instant-messengers/hydrogen-web/unwrapped.nix { };
 
@@ -32586,6 +32575,10 @@ with pkgs;
   img-cat = callPackage ../applications/graphics/img-cat { };
 
   imgp = python3Packages.callPackage ../applications/graphics/imgp { };
+
+  imhex = callPackage ../by-name/im/imhex/package.nix {
+    llvm = llvm_17;
+  };
 
   inframap = callPackage ../applications/networking/cluster/inframap { };
 
@@ -35570,8 +35563,6 @@ with pkgs;
     inherit (linuxPackages) x86_energy_perf_policy;
   };
 
-  tippecanoe = callPackage ../applications/misc/tippecanoe { };
-
   tmatrix = callPackage ../applications/misc/tmatrix { };
 
   tnef = callPackage ../applications/misc/tnef { };
@@ -35774,11 +35765,6 @@ with pkgs;
   unigine-superposition = libsForQt5.callPackage ../applications/graphics/unigine-superposition { };
 
   unipicker = callPackage ../applications/misc/unipicker { };
-
-  unison = callPackage ../applications/networking/sync/unison {
-    enableX11 = config.unison.enableX11 or true;
-    inherit (darwin.apple_sdk.frameworks) Cocoa;
-  };
 
   unpaper = callPackage ../tools/graphics/unpaper { };
 
@@ -36905,7 +36891,7 @@ with pkgs;
 
   wasabibackend = callPackage ../applications/blockchains/wasabibackend { };
 
-  wownero = disable-warnings-if-gcc13 (callPackage ../applications/blockchains/wownero { });
+  wownero = callPackage ../applications/blockchains/wownero { };
 
   zcash = callPackage ../applications/blockchains/zcash {
     inherit (darwin.apple_sdk.frameworks) Security;
