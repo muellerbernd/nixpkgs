@@ -25,9 +25,9 @@ cmakeConfigurePhase() {
         export CTEST_PARALLEL_LEVEL=$NIX_BUILD_CORES
     fi
 
-    if [ -z "${dontFixCmake-}" ]; then
-        fixCmakeFiles .
-    fi
+    # if [ -z "${dontFixCmake-}" ]; then
+    #     fixCmakeFiles .
+    # fi
 
     if [ -z "${dontUseCmakeBuildDir-}" ]; then
         mkdir -p "$cmakeBuildDir"
