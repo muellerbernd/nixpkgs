@@ -1,7 +1,6 @@
 {
   lib,
   stdenv,
-  fetchpatch,
   fetchFromGitHub,
 
   # nativeBuildInputs
@@ -34,12 +33,6 @@ stdenv.mkDerivation rec {
   ];
 
   patches = [
-    # https://github.com/eclipse-zenoh/zenoh-c/pull/815
-    # (fetchpatch {
-    #   name = "do-not-hardcode-linker-path.patch";
-    #   url = "https://github.com/eclipse-zenoh/zenoh-c/commit/e90b3ffe1c3bee9a99a743913233eaa88b2d92c6.patch";
-    #   hash = "sha256-JjG2tNU9NWna7lKyoQPTwM0NrXDDH0SjRDK+YoRJZUU=";
-    # })
     ./cmake-absolute-install-path.patch
   ];
 
